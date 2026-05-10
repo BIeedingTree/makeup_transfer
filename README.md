@@ -8,6 +8,72 @@ Our proposed framework, Stable-Makeup, is a novel diffusion-based method for mak
 ![method](https://github.com/Xiaojiu-z/Stable-Makeup/blob/main/assets/sm_method.jpg)
 Given a source image $\mathit{I_s}$ , a reference makeup image $\mathit{I_m}$ and an obtained facial structure control image $\mathit{I_c}$ , Stable-Makeup utilizes D-P makeup encoder to encode $\mathit{I_m}$. Content and structural encoders are used to encode $\mathit{I_s}$ and $\mathit{I_c}$ respectively. With the aid of the makeup cross-attention layers, Stable-Makeup aligns the facial regions of $\mathit{I_s}$ and $\mathit{I_m}$ , enabling successful transfers the intricate makeup details. After content-structure decoupling training, Stable-Makeup further maintains content and structure of $\mathit{I_s}$ .
 
+## Custom Extensions & Composable Makeup Transfer
+
+In addition to the original paper implementation, this fork includes a **composable partial makeup transfer pipeline** that enables flexible, multi-reference makeup application:
+
+### Pipeline Overview
+```
+prepare_id.py → generate_sd_makeup.py (×2 refs) → [cv_dlib.py | dl_alpha.py | dl_lab.py] → Composite Output
+```
+
+### Key Features
+
+#### 1. **ID Dataset Preparation** (`prepare_id.py`)
+- Samples and resizes 1000 images from FFHQ dataset to 512×512 resolution
+- Prepares base ID images for pipeline processing
+
+#### 2. **Makeup Generation** (`generate_sd_makeup.py`)
+- Generates diverse makeup variants using Stable Diffusion v1.5 with LEDITS inversion
+- Creates two reference makeup sets (A and B) from customizable prompts (`prompt.txt`)
+- Uses DDIM sampling with semantic guidance for stable, controllable generation
+
+#### 3. **Composable Partial Transfer** – Choose One of Three Methods
+
+**Option A: Landmark-Based Transfer** (`cv_dlib.py`)
+- **Method**: Dlib facial landmarks (68 points) for precise region identification
+- **Features**: Eyes from Reference A (landmarks 36-47) + Lips from Reference B (landmarks 48-67)
+- **Blending**: Poisson seamless cloning for natural boundaries
+- **Speed**: Fast (~10-30 min for 1000 images)
+- **Requirements**: `shape_predictor_68_face_landmarks.dat`
+
+**Option B: Semantic Segmentation + Alpha Blending** (`dl_alpha.py`)
+- **Method**: BiSeNet face parsing (19 classes) with soft alpha blending in RGB space
+- **Features**: Eyes (classes 4,5) + Lips (classes 12,13) with skin-aware dilation
+- **Blending**: Gaussian blur masks for smooth color transitions
+- **Speed**: Moderate (~30-60 min for 1000 images with GPU)
+- **Requirements**: BiSeNet weights (`79999_iter.pth`), CUDA GPU recommended
+
+**Option C: LAB Color Space Transfer** (`dl_lab.py`)
+- **Method**: BiSeNet parsing with advanced LAB color space blending
+- **Features**: Full color transfer (A & B channels) + 50% lightness transfer (L channel)
+- **Advantage**: Superior color fidelity and natural makeup appearance
+- **Blending**: Decomposed color and lightness control for professional results
+- **Speed**: Slowest (~60+ min for 1000 images with GPU)
+- **Best For**: High-quality, realistic makeup transfer
+
+### Output
+All methods produce composited face images in `data/partial_transfer/` with combined eye makeup from Reference A and lip makeup from Reference B.
+
+### Usage Example
+```bash
+# Step 1: Prepare dataset
+python prepare_id.py
+
+# Step 2: Generate two makeup references (modify prompts in prompt.txt for different styles)
+python generate_sd_makeup.py
+# Rename output folder to: data/makeup_image_A/
+python generate_sd_makeup.py
+# Rename output folder to: data/makeup_image_B/
+
+# Step 3: Choose transfer method
+python cv_dlib.py      # Fast landmark-based
+# OR
+python dl_alpha.py     # Semantic segmentation with RGB blending
+# OR
+python dl_lab.py       # Semantic segmentation with LAB blending
+```
+
 ## Todo List
 1. - [x] inference and training code
 2. - [x] pre-trained weights
@@ -51,3 +117,4 @@ python gradio_demo_kps.py
   year={2024}
 }
 ```
+

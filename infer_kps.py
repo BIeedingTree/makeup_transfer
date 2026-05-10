@@ -2,7 +2,7 @@ import os
 import torch
 from PIL import Image
 from diffusers import UNet2DConditionModel as OriginalUNet2DConditionModel
-from utils.pipeline_sd15 import StableDiffusionControlNetPipeline
+from pipeline_sd15 import StableDiffusionControlNetPipeline
 from diffusers import DDIMScheduler, DPMSolverMultistepScheduler, ControlNetModel
 from diffusers.utils import load_image
 from detail_encoder.encoder_plus import detail_encoder
@@ -40,7 +40,8 @@ def concatenate_images(image_files, output_file):
         x_offset += img.width
     combined.save(output_file)
 
-model_id = "sd_model_v1-5". # your sdv1-5 path
+
+model_id = "runwayml/stable-diffusion-v1-5"
 makeup_encoder_path = "./models/stablemakeup/pytorch_model.bin"
 id_encoder_path = "./models/stablemakeup/pytorch_model_1.bin"
 pose_encoder_path = "./models/stablemakeup/pytorch_model_2.bin"
@@ -48,7 +49,8 @@ Unet = OriginalUNet2DConditionModel.from_pretrained(model_id, subfolder="unet").
 
 id_encoder = ControlNetModel.from_unet(Unet)
 pose_encoder = ControlNetModel.from_unet(Unet)
-makeup_encoder = detail_encoder(Unet, "./models/image_encoder_l", "cuda", dtype=torch.float32)
+# makeup_encoder = detail_encoder(Unet, "./models/image_encoder_l", "cuda", dtype=torch.float32)
+makeup_encoder = detail_encoder(Unet, "openai/clip-vit-large-patch14", "cuda", dtype=torch.float32)
 makeup_state_dict = torch.load(makeup_encoder_path)
 id_state_dict = torch.load(id_encoder_path)
 id_encoder.load_state_dict(id_state_dict, strict=False)

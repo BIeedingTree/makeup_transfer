@@ -1,4 +1,4 @@
-export MODEL_DIR="../../model_zoo/sd_model_v1-5"  # your SD path
+export MODEL_DIR="runwayml/stable-diffusion-v1-5"  # HF model id or local SD path
 export OUTPUT_DIR="./train_lr5e-5_1wface_with_mask"  # your save path
 
 if [ -n "$QS_LOG_DIR" ] && [ -n "$TRIAL_NAME" ]; then
@@ -8,7 +8,7 @@ else
 fi
 echo "LOG_PATH is "${LOG_PATH}
 
-cd  /mnt/public02/usr/zhangyuxuan1/projects/stable_makeup   # cd to your path
+cd /DATA/yantongliu/FinalProj/Stable-Makeup   # cd to your path
 
 accelerate launch train.py \
     --pretrained_model_name_or_path $MODEL_DIR \

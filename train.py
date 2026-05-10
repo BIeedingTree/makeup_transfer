@@ -35,10 +35,10 @@ from diffusers.utils.import_utils import is_xformers_available
 
 from pipeline_sd15 import StableDiffusionControlNetPipeline
 from diffusers import UNet2DConditionModel as OriginalUNet2DConditionModel
-from utils.unet_with_adapter import UNet2DConditionModel as UNet2DConditionModelWithAdapter
+# from utils.unet_with_adapter import UNet2DConditionModel as UNet2DConditionModelWithAdapter
 from detail_encoder.encoder_plus import detail_encoder
-from albumentations.pytorch import ToTensorV2
-import albumentations as A
+# from albumentations.pytorch import ToTensorV2
+# import albumentations as A
 import cv2
 
 if is_wandb_available():
@@ -643,7 +643,7 @@ def main(args):
         controlnet_id = ControlNetModel.from_unet(unet)
         controlnet_pose = ControlNetModel.from_unet(unet)
 
-    image_encoder_path = "./models/image_encoder_l"
+    image_encoder_path = "openai/clip-vit-large-patch14"
     makeup_encoder = detail_encoder(unet, image_encoder_path, accelerator.device, dtype=torch.float32)
 
     vae.requires_grad_(False)

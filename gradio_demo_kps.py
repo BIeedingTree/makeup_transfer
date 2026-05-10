@@ -29,8 +29,8 @@ def get_draw(pil_img, size):
         spigas_faces = spiga_segmentation(spigas, size=size)
         return spigas_faces
 
-# Initialize the model
-model_id = "sd_model_v1-5"  # your sd1.5 model path
+
+model_id = "sd_model_v1-5"  
 base_path = "./models/stablemakeup"
 makeup_encoder_path = base_path + "/pytorch_model.bin"
 id_encoder_path = base_path + "/pytorch_model_1.bin"
@@ -59,9 +59,9 @@ pipe = StableDiffusionControlNetPipeline.from_pretrained(
     torch_dtype=torch.float32).to("cuda")
 pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
 
-# Define your ML model or function here
+
 def model_call(id_image, makeup_image, num):
-    # # Your ML logic goes here
+
     id_image = Image.fromarray(id_image.astype('uint8'), 'RGB')
     makeup_image = Image.fromarray(makeup_image.astype('uint8'), 'RGB')
     id_image = id_image.resize((512, 512))
@@ -70,7 +70,7 @@ def model_call(id_image, makeup_image, num):
     result_img = makeup_encoder.generate(id_image=[id_image, pose_image], makeup_image=makeup_image, guidance_scale=num, pipe=pipe)
     return result_img
 
-# Create a Gradio interface
+
 image1 = gr.inputs.Image(label="id_image")
 image2 = gr.inputs.Image(label="makeup_image")
 number = gr.inputs.Slider(minimum=1.01, maximum=5, default=1.5, label="makeup_guidance_scale")
@@ -83,5 +83,5 @@ iface = gr.Interface(
     title="Facial Makeup Transfer Demo",
     description="Upload 2 images to see the model output. 1.05-1.15 is suggested for light makeup and 2 for heavy makeup"
 )
-# Launch the Gradio interface
+
 iface.queue().launch(server_name='0.0.0.0')

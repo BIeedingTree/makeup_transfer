@@ -1,14 +1,13 @@
 import numpy as np
 import tqdm
 from PIL import Image
-from datasets import load_dataset
 from spiga.inference.config import ModelConfig
 from spiga.inference.framework import SPIGAFramework
 from facelib import FaceDetector
 import cv2
 import os
 
-processor = SPIGAFramework(ModelConfig("300wpublic"))
+cfg = ModelConfig("300wpublic"); cfg.model_weights_url = "https://huggingface.co/spaces/pcuenq/uncanny-faces/resolve/main/spiga_300wpublic.pt"; processor = SPIGAFramework(cfg)
 
 def center_crop(image, size):
     width, height = image.size
@@ -22,11 +21,11 @@ def center_crop(image, size):
 def resize(image, size):
     width, height = image.size
     if width > height:
-        # 按宽度进行比例调整
+
         new_width = size
         new_height = int(height * (size / width))
     else:
-        # 按高度进行比例调整
+
         new_height = size
         new_width = int(width * (size / height))
     resized_image = image.resize((new_width, new_height))
@@ -34,19 +33,16 @@ def resize(image, size):
 
 def preprocess(example, name, path):
     image = resize(example, 512)
-    # 调用中心剪裁函数
+
     cropped_image = center_crop(image, 512)
-    # 保存剪裁后的图像
+
     cropped_image.save(path+name)
     return cropped_image
 
-# We obtain the bbox from the existing landmarks in the dataset.
-# We could use `dlib`, but this should be faster.
-# Note that the `landmarks` are stored as strings.
 
 def get_landmarks(image, detector):
     image = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
-    faces, boxes, scores, landmarks = detector.detect_align(image)  # 一定要用align啊
+    faces, boxes, scores, landmarks = detector.detect_align(image)  
     boxes = boxes.cpu().numpy()
     box_ls = []
     for box in boxes:
@@ -79,7 +75,7 @@ def bbox_from_landmarks(landmarks_):
         width = x_max - x_min
         height = y_max - y_min
 
-        # Give it a little room; I think it works anyway
+
         x_min -= 5
         y_min -= 5
         width += 10
@@ -106,14 +102,6 @@ def spiga_process(example, detector):
         return spigas
 
 
-# For some reason this map doesn't work with num_proc > 1 :(
-# TODO: run inference on GPU
-
-
-# ## "Segmentation"
-
-# We use bezier paths to draw contours and areas.
-
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.path import Path
@@ -123,7 +111,7 @@ import PIL
 def get_patch(landmarks, color='lime', closed=False):
     contour = landmarks
     ops = [Path.MOVETO] + [Path.LINETO] * (len(contour) - 1)
-    facecolor = (0, 0, 0, 0)  # Transparent fill color, if open
+    facecolor = (0, 0, 0, 0)  
     if closed:
         contour.append(contour[0])
         ops.append(Path.CLOSEPOLY)
@@ -132,10 +120,10 @@ def get_patch(landmarks, color='lime', closed=False):
     return patches.PathPatch(path, facecolor=facecolor, edgecolor=color, lw=4)
 
 
-# Draw to a buffer.
+
 
 def conditioning_from_landmarks(landmarks_, size=512):
-    # Precisely control output image size
+
     dpi = 72
     fig, ax = plt.subplots(1, figsize=[size / dpi, size / dpi], tight_layout={'pad': 0})
     fig.set_dpi(dpi)
@@ -184,8 +172,8 @@ def spiga_segmentation(spiga, size):
 
 
 if __name__ == '__main__':
-    # ## Obtain SPIGA features
-    processor = SPIGAFramework(ModelConfig("300wpublic"))
+
+    cfg = ModelConfig("300wpublic"); cfg.model_weights_url = "https://huggingface.co/spaces/pcuenq/uncanny-faces/resolve/main/spiga_300wpublic.pt"; processor = SPIGAFramework(cfg)
     detector = FaceDetector(weight_path="/share2/zhangyuxuan/project/train_ip_cn/datasets/make_kps/pretrained_models/mobilenet0.25_Final.pth")
 
     id_folder = "/share2/zhangyuxuan/project/train_ip_cn/test_img_2/id/"

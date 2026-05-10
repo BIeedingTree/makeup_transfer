@@ -1,0 +1,21 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store
+
+# Large data/model files
+*.pth
+*.bz2
+FFHQ/
+data/
+output/
+checkpoints/
+models/stablemakeup/
+trash/
+
+# Diffusers library (installed via pip, shouldn't be in repo)
+diffusers/
+diffusers.backup/
