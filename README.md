@@ -17,6 +17,15 @@ In addition to the original paper implementation, this fork includes a **composa
 prepare_id.py → generate_sd_makeup.py (×2 refs) → [cv_dlib.py | dl_alpha.py | dl_lab.py] → Composite Output
 ```
 
+Before running the compositing scripts (`cv_dlib.py`, `dl_alpha.py`, or `dl_lab.py`), you must download the following weights and place them in the root directory of this project:
+
+1. **[79999_iter.pth](https://huggingface.co/vivym/face-parsing-bisenet/resolve/main/79999_iter.pth)** (53 MB)
+   * *BiSeNet weights for semantic perception, trained on CelebAMask-HQ.*
+
+2. **[shape_predictor_68_face_landmarks.dat.bz2](http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2)** (61 MB)
+   * *Dlib weights for the classical CV baseline.*
+   * **Note:** This file downloads as a compressed `.bz2` archive. You must extract it before use. On Linux/Mac, you can run: `bzip2 -d shape_predictor_68_face_landmarks.dat.bz2`
+
 ### Key Features
 
 #### 1. **ID Dataset Preparation** (`prepare_id.py`)
